@@ -127,7 +127,16 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
         if (tag >= 0x50 && tag <= 0x57) {
             position.set(Position.PREFIX_ADC + (tag - 0x50), buf.readUnsignedShortLE());
         } else if (tag >= 0x60 && tag <= 0x62) {
-            position.set("fuel" + (tag - 0x60), buf.readUnsignedShortLE());
+            position.set(Position.KEY_FUEL_LEVEL + (tag - 0x60), buf.readUnsignedShortLE());
+        } else if (tag >= 0x63 && tag <= 0x6F) {
+            position.set(Position.KEY_FUEL_LEVEL + (tag - 0x60), buf.readUnsignedShortLE());
+            position.set(Position.KEY_FUEL_LEVEL + "Temp" + (tag - 0x60), buf.readByte());
+        } else if (tag >= 0x70 && tag <= 0x77) {
+            short id = buf.readUnsignedByte();
+            byte temp = buf.readByte();
+            if (id != 127 && temp != -128) {
+                position.set(Position.PREFIX_TEMP + (tag - 0x70), temp);
+            }
         } else if (tag >= 0xa0 && tag <= 0xaf) {
             position.set("can8BitR" + (tag - 0xa0 + 15), buf.readUnsignedByte());
         } else if (tag >= 0xb0 && tag <= 0xb9) {
@@ -154,6 +163,7 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             case 0x04 -> position.set("deviceId", buf.readUnsignedShortLE());
             case 0x10 -> position.set(Position.KEY_INDEX, buf.readUnsignedShortLE());
             case 0x20 -> position.setTime(new Date(buf.readUnsignedIntLE() * 1000));
+            case 0x21 -> position.set("milliseconds", buf.readUnsignedShortLE());
             case 0x33 -> {
                 position.setSpeed(UnitsConverter.knotsFromKph(buf.readUnsignedShortLE() * 0.1));
                 position.setCourse(buf.readUnsignedShortLE() * 0.1);
@@ -167,19 +177,24 @@ public class GalileoProtocolDecoder extends BaseProtocolDecoder {
             case 0x44 -> position.set(Position.KEY_ACCELERATION, buf.readUnsignedIntLE());
             case 0x45 -> position.set(Position.KEY_OUTPUT, buf.readUnsignedShortLE());
             case 0x46 -> position.set(Position.KEY_INPUT, buf.readUnsignedShortLE());
-            case 0x48 -> position.set("statusExtended", buf.readUnsignedShortLE());
+            case 0x47 -> position.set(Position.KEY_DRIVING_STYLE, buf.readUnsignedIntLE());
+            case 0x48 -> position.set(Position.KEY_STATUS + "Extended", buf.readUnsignedShortLE());
+            case 0x49 -> position.set(Position.KEY_CHANNEL, buf.readByte());
             case 0x58 -> position.set("rs2320", buf.readUnsignedShortLE());
             case 0x59 -> position.set("rs2321", buf.readUnsignedShortLE());
+            case 0x89 -> position.set("rs2321Extended", buf.readByte());
             case 0x90 -> position.set(Position.KEY_DRIVER_UNIQUE_ID, String.valueOf(buf.readUnsignedIntLE()));
             case 0xc0 -> position.set("fuelTotal", buf.readUnsignedIntLE() * 0.5);
             case 0xc1 -> {
-                position.set(Position.KEY_FUEL_LEVEL, buf.readUnsignedByte() * 0.4);
-                position.set(Position.PREFIX_TEMP + 1, buf.readUnsignedByte() - 40);
-                position.set(Position.KEY_RPM, buf.readUnsignedShortLE() * 0.125);
+                position.set(Position.KEY_FUEL_LEVEL + "Can", buf.readUnsignedByte() * 0.4);
+                position.set(Position.PREFIX_TEMP + "Can", buf.readUnsignedByte() - 40);
+                position.set(Position.KEY_RPM + "Can", buf.readUnsignedShortLE() * 0.125);
             }
             case 0xc2 -> position.set("canB0", buf.readUnsignedIntLE());
             case 0xc3 -> position.set("canB1", buf.readUnsignedIntLE());
+            case 0xd3 -> position.set("iButton", String.valueOf(buf.readUnsignedIntLE()));
             case 0xd4 -> position.set(Position.KEY_ODOMETER, buf.readUnsignedIntLE());
+            case 0xd5 -> position.set("iButton" + "Status", String.valueOf(buf.readUnsignedByte()));
             case 0xe0 -> position.set(Position.KEY_INDEX, buf.readUnsignedIntLE());
             case 0xe1 -> position.set(Position.KEY_RESULT,
                     buf.readSlice(buf.readUnsignedByte()).toString(StandardCharsets.US_ASCII));

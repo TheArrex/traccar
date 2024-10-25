@@ -50,6 +50,7 @@ public class Position extends Message {
     public static final String KEY_IMAGE = "image";
     public static final String KEY_VIDEO = "video";
     public static final String KEY_AUDIO = "audio";
+    public static final String KEY_CHANNEL = "channel";
 
     // The units for the below four KEYs currently vary.
     // The preferred units of measure are specified in the comment for each.
@@ -93,6 +94,7 @@ public class Position extends Message {
     public static final String KEY_PHONE = "phone";
     public static final String KEY_SPEED_LIMIT = "speedLimit";
     public static final String KEY_DRIVING_TIME = "drivingTime";
+    public static final String KEY_DRIVING_STYLE = "drivingStyle";
 
     public static final String KEY_DTCS = "dtcs";
     public static final String KEY_OBD_SPEED = "obdSpeed"; // km/h
